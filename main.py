@@ -9,6 +9,7 @@ import string, os, sys, subprocess
 import urllib
 import urllib2
 import cookielib
+import facebook
 from pprint import pprint
 import urlparse
 from flask import request, Flask
@@ -20,8 +21,6 @@ SEARCH_PATH = '/v2.2/search'
 APP_ID = '672075099578708'
 APP_SECRET = '6dd38e112d673598805a4cd47ccf687d'
 YO_API_TOKEN = 'dfead9b0-ddf2-49a4-9fcd-b304b83f9e27'
-
-#graph = facebook.GraphAPI(FACEBOOK_APP_TOKEN)
 
 #uses the app id and secret from Facebook to generate the token
 def get_token():
@@ -91,7 +90,7 @@ def yo():
 
 
     # Yo the result back to the user
-    requests.post("http://api.justyo.co/yo/", data={'api_token': YO_API_TOKEN, 'username': username, 'link': results_url})
+    requests.post("http://api.justyo.co/yo/", data={'api_token': YO_API_TOKEN, 'username': username, 'link': events_url})
 
     # OK!
     return 'OK'
