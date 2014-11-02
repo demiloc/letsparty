@@ -9,7 +9,6 @@ import string, os, sys, subprocess
 import urllib
 import urllib2
 import cookielib
-from json
 from pprint import pprint
 import urlparse
 from flask import request, Flask
