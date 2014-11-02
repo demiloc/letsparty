@@ -2,51 +2,67 @@
 Yo Single-Tap Party Finder
 """
 
-import sys
+from __future__ import division
+import json
 import requests
-import oauth2
-import facebook
+import string, os, sys, subprocess
+import urllib
+import urllib2
+import cookielib
+from json
+from pprint import pprint
+import urlparse
 from flask import request, Flask
 
 API_HOST = 'graph.facebook.com'
-SEARCH_LIMIT = 5
+SEARCH_LIMIT = 1
 SEARCH_PATH = '/v2.2/search'
 
-FACEBOOK_APP_TOKEN = '672075099578708|T1yvdE43kWyph2r6MiYmft7VAYs'
+APP_ID = '672075099578708'
+APP_SECRET = '6dd38e112d673598805a4cd47ccf687d'
 YO_API_TOKEN = 'dfead9b0-ddf2-49a4-9fcd-b304b83f9e27'
 
 graph = facebook.GraphAPI(FACEBOOK_APP_TOKEN)
 
-def do_request(host, path, url_params=None):
+#uses the app id and secret from Facebook to generate the token
+def get_token():
     
-    url = 'http://{0}{1}'.format(host, path)
-    consumer = oauth2.Consumer(CONSUMER_KEY, CONSUMER_SECRET)
-    oauth_request = oauth2.Request('GET', url, url_params)
-    oauth_request.update(
-        {
-            'oauth_nonce': oauth2.generate_nonce(),
-            'oauth_timestamp': oauth2.generate_timestamp(),
-            'oauth_token': TOKEN,
-            'oauth_consumer_key': CONSUMER_KEY
-        }
-    )
-    token = oauth2.Token(TOKEN, TOKEN_SECRET)
-    oauth_request.sign_request(oauth2.SignatureMethod_HMAC_SHA1(), consumer, token)
-    signed_url = oauth_request.to_url()
+    oauth_args = dict(client_id = APP_ID, client_secret = APP_SECRET, grant_type = 'client_credentials')
+    try:
+        url = 'https://'+API_HOST+'/ouath/access_token?'+ urllib.urlencode(oauth_args)
+        r = requests.get(url)
+        access_token = r.text
+    except:
+        access_token = ""
 
-    print 'Querying Yelp {0}'.format(signed_url)
+    return access_token
 
-    response = requests.get(signed_url)
-    response_object = response.json()
-    return response_object
+#loads the returned JSON data and finds the Facebook ID of the location
+def get_location_id(access_token, code):
 
-def search(term, city, state):
+    url = 'https://'+API_HOST+'/'+SEARCH_PATH+'?center='+latitude+','+longitude+'&type=place&distance=100&access_token='+access_token
+    data = json.load(url)
+    location_id = data["Local business"]['id']
+    
+    return location_id
 
-    # search the Facebook Graph API to find a location based on Lat x Long
-    # --- INSERT CODE HERE --- #
+#loads the returned JSON data and finds the city name
+def get_city_name(access_token, code):
 
-    return do_request(API_HOST, SEARCH_PATH, url_params=url_params)
+    url = 'https://'+API_HOST+'/'+SEARCH_PATH+'?center='+latitude+','+longitude+'&type=place&distance=100&access_token='+access_token
+    data = json.load(url)
+    location_id = data['Location']['city']
+    
+    return city
 
+#uses the location id to find parties nearby
+def parties_search(location_id):
+    url = 'https://'+API_HOST+'/search/'+location_id+'/events-near/today/date/events/intersect'
+    result = requests.get(url)
+
+    return result
+    
+    
 
 app = Flask(__name__)
 
@@ -64,17 +80,19 @@ def yo():
     print "We got a Yo from " + username
 
     #use Facebook API to get location ID
-    # --- INSERT CODE HERE --- #
+    access_token = get_token()
+    location_id = get_location_id(access_token,latitude,longitude)
+    city = get_city_name(access_token,latitude,longitude)
     
     print username + " is at " + city
 
     # search for parties in range of location ID
-    # return the top 5 parties on the list to the user
-    # --- INSERT CODE HERE --- #
+    # return the top party on the list to the user
+    events_url = parties_search(location_id)
 
 
     # Yo the result back to the user
-    requests.post("http://api.justyo.co/yo/", data={'api_token': YO_API_TOKEN, 'username': username, 'link': bar_url})
+    requests.post("http://api.justyo.co/yo/", data={'api_token': YO_API_TOKEN, 'username': username, 'link': results_url})
 
     # OK!
     return 'OK'
