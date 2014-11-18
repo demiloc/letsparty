@@ -18,8 +18,8 @@ API_HOST = 'graph.facebook.com'
 SEARCH_LIMIT = 1
 SEARCH_PATH = '/v2.2/search'
 
-APP_ID = '672075099578708'
-APP_SECRET = '6dd38e112d673598805a4cd47ccf687d'
+APP_ID = ''
+APP_SECRET = ''
 YO_API_TOKEN = 'dfead9b0-ddf2-49a4-9fcd-b304b83f9e27'
 
 #uses the app id and secret from Facebook to generate the token
